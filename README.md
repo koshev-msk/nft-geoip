@@ -144,9 +144,9 @@ make -C /path/to/kernel/build M=$PWD modules
 Userspace, on clean release tarballs:
 
 ```sh
-cd libnftnl-1.3.1 && patch -p1 < ../libnftnl/100-add-geoip-expression.patch
+cd libnftnl-1.3.1 && patch -p1 < ../libnftnl/100-libnftnl-add-geoip-expression.patch
 autoreconf -fi && ./configure && make && make install
-cd ../nftables-1.1.6 && patch -p1 < ../nftables/100-add-geoip-statement.patch
+cd ../nftables-1.1.6 && patch -p1 < ../nftables/100-nftables-add-geoip-statement.patch
 ./configure && make && make install
 ```
 
