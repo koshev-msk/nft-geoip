@@ -83,7 +83,7 @@ new data. A country used by several rules is loaded once.
 
 ## Building with the OpenWrt SDK
 
-Tested with SDK 25.12.6 (sunxi/cortexa7, kernel 6.12.112).
+Tested with SDK 25.12.6 (more arch, kernel 6.12.112).
 
 1. Add the package to a feed (the example below uses a custom feed) so that it
    ends up as `.../nft-geoip/Makefile` plus `.../nft-geoip/src/`.
@@ -193,6 +193,41 @@ and keep geo rules in a separate snippet that is easy to disable.
 - The netlink attribute ids (`NFTA_GEOIP_FLAGS = 1`, `NFTA_GEOIP_CC = 2`) are
   not part of the kernel's `nf_tables.h`; they are defined in `nft_geoip.h` and
   duplicated in the libnftnl patch. Keep them in sync.
+
+
+## Memory usage comparison: `nftset` vs `nft_geoip`
+
+A memory usage comparison was performed on an OpenWrt router with **128 MiB of RAM**, using the same set of seven countries (`CN`, `GB`, `UA`, `PL`, `LT`, `LV`, `EE`) for both implementations.
+
+### Results
+
+| Memory metric | `nft_geoip` | `nftset` | Difference (`nftset` − `nft_geoip`) |
+|---|---:|---:|---:|
+| `MemAvailable` | 60,356 KiB | 22,008 KiB | **−38,348 KiB** |
+| `MemFree` | 71,080 KiB | 35,676 KiB | −34,404 KiB |
+| `Slab` | 12,756 KiB | 41,824 KiB | **+29,068 KiB** |
+| `SUnreclaim` | 9,756 KiB | 38,900 KiB | **+29,144 KiB** |
+| `SReclaimable` | 3,000 KiB | 2,924 KiB | −76 KiB |
+| `Cached` | 24,776 KiB | 19,048 KiB | −5,728 KiB |
+| `VmallocUsed` | 3,012 KiB | 1,344 KiB | −1,668 KiB |
+| `AnonPages` | 3,508 KiB | 3,500 KiB | −8 KiB |
+
+All values are in KiB. The snapshots were collected after applying the respective firewall rules.
+
+### Key observations
+
+- **29,068 KiB (~28.4 MiB) less slab memory** was reported with `nft_geoip`.
+- `nftset` showed **29,144 KiB (~28.5 MiB) more unreclaimable slab memory**.
+- Available memory was **38,348 KiB (~37.5 MiB) higher** with `nft_geoip`.
+- Anonymous memory usage was nearly identical in both snapshots, suggesting that the observed difference was not caused by a significant increase in userspace process memory.
+- `VmallocUsed` was 1,668 KiB higher with `nft_geoip`, approximately matching the combined on-disk sizes of the selected countries' IPv4 and IPv6 GeoIP database files.
+
+### Conclusion
+
+In this test, `nft_geoip` showed substantially lower slab memory usage than the `nftset` implementation for the same set of countries. On a router with 128 MiB of RAM, the observed difference is significant: approximately **28.4 MiB less slab memory** and **37.5 MiB more available memory**.
+
+These are measurements from individual snapshots, not a fully controlled benchmark. The results demonstrate a strong correlation between the implementation and memory usage, but further repeated tests under identical conditions are needed to attribute the entire difference exclusively to the GeoIP implementation.
+
 
 ## Status and limitations
 
