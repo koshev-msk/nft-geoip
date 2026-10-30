@@ -144,9 +144,9 @@ make -C /path/to/kernel/build M=$PWD modules
 Userspace, on clean release tarballs:
 
 ```sh
-cd libnftnl-1.3.1 && patch -p1 < ../libnftnl/100-libnftnl-add-geoip-expression.patch
+cd libnftnl-1.3.1 && patch -p1 < ../100-libnftnl-add-geoip-expression.patch
 autoreconf -fi && ./configure && make && make install
-cd ../nftables-1.1.6 && patch -p1 < ../nftables/100-nftables-add-geoip-statement.patch
+cd ../nftables-1.1.6 && patch -p1 < ../100-nftables-add-geoip-statement.patch
 ./configure && make && make install
 ```
 
@@ -204,7 +204,7 @@ A memory usage comparison was performed on an OpenWrt router with **128 MiB of R
 | Memory metric | `nft_geoip` | `nftset` | Difference (`nftset` − `nft_geoip`) |
 |---|---:|---:|---:|
 | `MemAvailable` | 60,356 KiB | 22,008 KiB | **−38,348 KiB** |
-| `MemFree` | 71,080 KiB | 35,676 KiB | −34,404 KiB |
+| `MemFree` | 71,080 KiB | 35,676 KiB | −35,404 KiB |
 | `Slab` | 12,756 KiB | 41,824 KiB | **+29,068 KiB** |
 | `SUnreclaim` | 9,756 KiB | 38,900 KiB | **+29,144 KiB** |
 | `SReclaimable` | 3,000 KiB | 2,924 KiB | −76 KiB |
